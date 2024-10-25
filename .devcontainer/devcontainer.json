@@ -1,0 +1,20 @@
+{
+    "name": "Dev C-Compiler",
+    "runArgs": ["--name", "Dev-C-Compiler"],
+    "build":{
+        "dockerfile": "../Dockerfile"
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-extension-pack",
+                "ms-vscode.cpptools-themes",
+                "twxs.cmake",
+                "ms-vscode.cmake-tools",
+                "oderwat.indent-rainbow",
+                "MS-CEINTL.vscode-language-pack-ja"
+            ]
+        }
+    }
+}
