@@ -16,8 +16,13 @@ assert(){
     fi
 }
 
-for i in {0..255}; do
-    assert "$i" "$i"
+for i in {0..10}; do
+    a=$((RANDOM%10))
+    b=$((RANDOM%10))
+    c=$((RANDOM%10))
+    d=$((RANDOM%10))
+    ans=$((a+b-c+d))
+    assert "$ans" "$a+$b-$c+$d"
 done
 
 echo OK
