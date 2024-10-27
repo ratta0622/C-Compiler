@@ -234,6 +234,49 @@ Node* primary(){
     }
 }
 
+//Output assembly for calculating expressions on integers represented by the nodes of the abstract syntax tree.
+void genAssemblyFromNodesOfEBNF(Node* node){
+    //if node is term of single number
+    if(node->kind == ND_NUM){
+        printf("    push %d\n", node->val);
+        return;
+    }else{
+        genAssemblyFromNodesOfEBNF(node->lhs);
+        genAssemblyFromNodesOfEBNF(node->rhs);
+
+        switch (node->kind)
+        {
+        case ND_ADD:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    add rax, rdi\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_SUB:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    sub rax, rdi\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_MUL:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    imul rax, rdi\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_DIV:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    cqo\n");
+            printf("    idiv rdi\n");
+            printf("    push rax\n");
+            break;
+        }
+    }
+}
 
 int main(int argc, char *argv[]){
     if(argc != 2){
