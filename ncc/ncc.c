@@ -26,12 +26,35 @@ struct Token{
 //the current token being focused on
 Token *token;
 
+//input
+char* user_input;
+
+//Report the error location
+void error_at(char* location, char* format, ...){
+    va_list ap;
+    va_start(ap, format);
+
+    int pos = location - user_input; //the byte position of the rror in the input
+
+    fprintf(stderr, "\nInput error\n\n");
+    //1st line ... user_input
+    fprintf(stderr, "%s\n", user_input);
+
+    //2nd line
+    fprintf(stderr, "%*s", pos, " "); //output pos number of spaces
+    fprintf(stderr, "^");
+    vfprintf(stderr, format, ap);
+    fprintf(stderr, "\n");
+
+    exit(1);
+}
+
 //function to report errors
 //This takes the same arguments as printf
 void error(char *format, ...){
     va_list ap;
     va_start(ap, format);
-    vfprintf(stderr, format, ap); //same as printf
+    vfprintf(stderr, format, ap); //same as printf     (printf("hoge%d%s", 1, huga))   ------->    format = "hoge%d%s"     ap = 1, huga
     fprintf(stderr, "\n");
     exit(1);
 }
@@ -54,7 +77,7 @@ void expect_operator(char op){
     if(token->kind == TK_OPE && token->str[0] == op){
         token = token->next;
     }else{
-        error("not '%c'", op);
+        error_at(token->str, "not %c", op);
     }
 }
 
@@ -66,7 +89,7 @@ int expect_number(){
         token = token->next;
         return num;
     }else{
-        error("not a number");
+        error_at(token->str, "not a number");
     }
 }
 
@@ -134,6 +157,9 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Incorrect number of arguments\n");
         return 1;
     }
+
+    //Save argv[1] to user_input(global val) for error messages.
+    user_input = argv[1];
 
     //Tokenize input
     token = tokenize(argv[1]);
