@@ -16,13 +16,14 @@ assert(){
     fi
 }
 
-for i in {0..10}; do
+for i in {0..100}; do
     a=$((RANDOM%10))
     b=$((RANDOM%10))
-    c=$((RANDOM%10))
+    c=$((RANDOM%10+1))
     d=$((RANDOM%10))
-    ans=$((a+b-c+d))
-    assert "$ans" "$a+$b-$c+$d"
+    e=$((RANDOM%10+1))
+    ans=$(((a+b)*c-d/e))
+    assert "$ans" "($a+$b)*$c-$d/$e"
 done
 
 echo OK

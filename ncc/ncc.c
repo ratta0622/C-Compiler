@@ -143,7 +143,7 @@ Token* tokenize(char *p){
         }
 
         //If p is an operator
-        if(*p == '+' || *p == '-'){
+        if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')'){
             cur = new_token(TK_OPE, cur, p++);
             continue;
         }
@@ -284,30 +284,25 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
-    //Save argv[1] to user_input(global val) for error messages.
+    // Save argv[1] to user_input(global val) for error messages.
     user_input = argv[1];
 
-    //Tokenize input
-    token = tokenize(argv[1]);
+    // Tokenize input
+    token = tokenize(user_input);
 
-    //Output the first half of the assembly
+    // Perse the torkenized expression
+    Node* node = expr();
+
+    // Output the first half of the assembly
     printf(".intel_syntax noprefix\n");
     printf(".global main\n");
     printf("main:\n");
 
-    //Check whether the expression starts with a number (expect_number())
-    //and output the first mov instruction
-    printf("    mov rax, %d\n", expect_number());
+    // Output the assembly for calculations
+    genAssemblyFromNodesOfEBNF(node);
 
-    while(!at_eof()){
-        if(consume('+')){
-            printf("    add rax, %d\n", expect_number());
-        }else{
-            expect_operator('-');
-            printf("    sub rax, %d\n", expect_number());
-        }
-    }
-
+    // Pop the calculation result from the stack, and return
+    printf("    pop rax\n");
     printf("    ret\n");
 
     return 0;
