@@ -153,8 +153,9 @@ Token* tokenize(char *p){
 
         //If p is an operator
         if(strncmp(p, "==", 2)==0 || strncmp(p, "!=", 2)==0 || strncmp(p, "<=", 2)==0 || strncmp(p, ">=", 2)==0){
+            cur = new_token(TK_OPE, cur, p, 2);
             ++p; ++p;
-        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')'){
+        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>'){
             cur = new_token(TK_OPE, cur, p++, 1);
             continue;
         }
@@ -230,15 +231,16 @@ Node* expr(){
 
 Node* relational(){
     Node* node = add();
+
     while(1){
-        if(consume("<")){
-            node = new_node_op(ND_GE, node, add());
+        if(consume(">=")){
+            node = new_node_op(ND_GEQ, add(), node);
+        }else if(consume(">")){
+            node = new_node_op(ND_GE, add(), node);
         }else if(consume("<=")){
-            node = new_node_op(ND_GEQ, node, add());
-        }else if(consume("")){
-            node = new_node_op(ND_LE, node, add());
-        }else if(consume("")){
             node = new_node_op(ND_LEQ, node, add());
+        }else if(consume("<")){
+            node = new_node_op(ND_LE, node, add());
         }else{
             return node;
         }
@@ -247,6 +249,7 @@ Node* relational(){
 
 Node* add(){
     Node* node = mul();
+
     while(1){
         if(consume("+")){
             node = new_node_op(ND_ADD, node, mul());
@@ -330,6 +333,42 @@ void genAssemblyFromNodesOfEBNF(Node* node){
             printf("    pop rax\n");
             printf("    cqo\n");
             printf("    idiv rdi\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_EQ:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    cmp rax, rdi\n");
+            printf("    sete al\n");
+            printf("    movzb rax, al\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_NEQ:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    cmp rax, rdi\n");
+            printf("    setne al\n");
+            printf("    movzb rax, al\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_LE:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    cmp rax, rdi\n");
+            printf("    setl al\n");
+            printf("    movzb rax, al\n");
+            printf("    push rax\n");
+            break;
+
+        case ND_LEQ:
+            printf("    pop rdi\n");
+            printf("    pop rax\n");
+            printf("    cmp rax, rdi\n");
+            printf("    setle al\n");
+            printf("    movzb rax, al\n");
             printf("    push rax\n");
             break;
         }
