@@ -12,7 +12,7 @@ typedef enum{
     TK_EOF, //token of End Of File(\0)
 } TokenKind;
 
-//type of token
+//type of tokens
 //(list of token <=> input equation)
 typedef struct Token Token;
 
@@ -22,6 +22,26 @@ struct Token{
     int val;        //number of token(if token = TK_NUM)
     char *str;      //Token string
 };
+
+//kinds of nodes in the abstract syntax tree
+typedef enum{
+    ND_ADD, // +
+    ND_SUB, // -
+    ND_MUL, // *
+    ND_DIV, // /
+    ND_NUM, // integer
+} NodeKind;
+
+//type of nodes in the abstract syntax tree
+typedef struct Node Node;
+
+struct Node{
+    NodeKind kind; // type of a node
+    Node *lhs;     // left-hand side
+    Node *rhs;     // right-hand side
+    int val;       // number of a node (if kind = ND_NUM)
+};
+
 
 //the current token being focused on
 Token *token;
@@ -98,7 +118,7 @@ bool at_eof(){
     return token->kind == TK_EOF;
 }
 
-//create new token, and link it to cur
+//create a new token, and link it to cur
 //(use like,     cur = new_token(TK_OPE, cur, p)          )
 Token* new_token(TokenKind kind, Token* cur, char* str){
     Token* tok = calloc(1, sizeof(Token));
@@ -149,6 +169,69 @@ void debug_token(){
         token = token->next;
     }
     error("debug function\n");
+}
+
+
+//Create a new node (kind is operator)
+Node* new_node_op(NodeKind kind, Node* lhs, Node* rhs){
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = kind;
+    node->lhs = lhs;
+    node->rhs = rhs;
+    return node;
+}
+//Create a new node(kind is number)
+Node* new_node_num(int val){
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_NUM;
+    node->val = val;
+    return node;
+}
+
+//EBNF(abstract syntax tree)
+// expr    = mul ('+' mul | '-' mul)*
+// mul     = primary ('*' primary | '/' primary)*
+// primary = num | ( '(' expr ')')
+Node* expr();
+Node* mul();
+Node* primary();
+
+Node* expr(){
+    Node* node = mul();
+
+    while(1){
+        if(consume('+')){
+            node = new_node_op(ND_ADD, node, mul());
+        }else if(consume('-')){
+            node = new_node_op(ND_SUB, node, mul());
+        }else{
+            return node;
+        }
+    }
+}
+
+Node* mul(){
+    Node* node = primary();
+
+    while(1){
+        if(consume('*')){
+            node = new_node_op(ND_MUL, node, primary());
+        }else if(consume('/')){
+            node = new_node_op(ND_DIV, node, primary());
+        }else{
+            return node;
+        }
+    }
+}
+
+Node* primary(){
+    if(consume('(')){
+        Node* node = expr();
+        expect_operator(')');
+        return node;
+    }else{
+        return new_node_num(expect_number());
+    }
 }
 
 
