@@ -30,6 +30,12 @@ typedef enum{
     ND_SUB, // -
     ND_MUL, // *
     ND_DIV, // /
+    ND_EQ,  // ==
+    ND_NEQ, // !=
+    ND_GE,  // >
+    ND_GEQ, // >=
+    ND_LE,  // <
+    ND_LEQ, // <=
     ND_NUM, // integer
 } NodeKind;
 
@@ -194,18 +200,53 @@ Node* new_node_num(int val){
 }
 
 //EBNF(abstract syntax tree)
-// expr    = mul ('+' mul | '-' mul)*
-// mul     = unary ('*' unary | '/' unary)*
-// unary   = ('+' | '-')? primary
-// primary = num | ( '(' expr ')')
+// expr       = equality
+// equality   = relational ("==" relational | "!=" relational)*
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+// add        = mul ("+" mul | "-" mul)*
+// mul        = unary ('*' unary | '/' unary)*
+// unary      = ('+' | '-')? primary
+// primary    = num | ( '(' expr ')')
 Node* expr();
+Node* relational();
+Node* add();
 Node* mul();
 Node* unary();
 Node* primary();
 
 Node* expr(){
-    Node* node = mul();
+    Node* node = relational();
 
+    while(1){
+        if(consume("==")){
+            node = new_node_op(ND_EQ, node, relational());
+        }else if(consume("!=")){
+            node = new_node_op(ND_NEQ, node, relational());
+        }else{
+            return node;
+        }
+    }
+}
+
+Node* relational(){
+    Node* node = add();
+    while(1){
+        if(consume("<")){
+            node = new_node_op(ND_GE, node, add());
+        }else if(consume("<=")){
+            node = new_node_op(ND_GEQ, node, add());
+        }else if(consume("")){
+            node = new_node_op(ND_LE, node, add());
+        }else if(consume("")){
+            node = new_node_op(ND_LEQ, node, add());
+        }else{
+            return node;
+        }
+    }
+}
+
+Node* add(){
+    Node* node = mul();
     while(1){
         if(consume("+")){
             node = new_node_op(ND_ADD, node, mul());
