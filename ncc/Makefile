@@ -1,18 +1,21 @@
 CFLAGS=-std=c11 -g -static
+SRCS=$(wildcard *.c)
+OBJS=$(SRCS:%.c=%.o)
 
-ncc: ncc.c
+ncc: $(OBJS)
+	$(CC) -o ncc $(OBJS) $(LDFLAGS)
 
 assert: ncc
 	bash assert.sh
 
-tmp: tmp
+tmp: tmp.s
 	gcc -o tmp tmp.s -z execstack
 	./tmp ; echo "$$?"
 
-test: test.txt
+test:
 	bash test.sh
 
 clean:
-	rm -f ncc *.o *~ tmp* test.txt
+	rm -f ncc *.o *~ tmp*
 
-.PHONY: assert clean
+.PHONY: assert clean test
