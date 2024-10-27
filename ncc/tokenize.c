@@ -33,7 +33,7 @@ void error(char *format, ...){
 
 //If current token is expected operator(TK_OPE), advance to the next token and return true.
 //Otherwise, return false.
-bool consume(char* op){
+bool consume_operator(char* op){
     if(token->kind == TK_OPE && strncmp(token->str, op, token->len)==0){
         token = token->next;
         return true;
@@ -61,6 +61,15 @@ int expect_number(){
         return num;
     }else{
         error_at(token->str, "not a number");
+    }
+}
+
+char consume_ident(){
+    if(token->kind == TK_IDENT){
+        token = token->next;
+        return token->str[0];
+    }else{
+        return '!';
     }
 }
 
@@ -100,14 +109,23 @@ Token* tokenize(char *p){
         if(strncmp(p, "==", 2)==0 || strncmp(p, "!=", 2)==0 || strncmp(p, "<=", 2)==0 || strncmp(p, ">=", 2)==0){
             cur = new_token(TK_OPE, cur, p, 2);
             ++p; ++p;
-        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>'){
+            continue;
+        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';'){
             cur = new_token(TK_OPE, cur, p++, 1);
+            continue;
+        }
+
+        //If p is an identifier (a-z)
+        if('a' <= *p && *p <= 'z'){
+            cur = new_token(TK_IDENT, cur, p++, 1);
             continue;
         }
 
         //If p is a number
         if(isdigit(*p)){
-            cur = new_token(TK_NUM, cur, p, 1);
+            char * endnum;
+            strtol(p, &endnum, 10);
+            cur = new_token(TK_NUM, cur, p, endnum-p);
             cur->val = strtol(p, &p, 10);
             continue;
         }

@@ -16,7 +16,7 @@ int main(int argc, char* argv[]){
     token = tokenize(user_input);
 
     // Perse the torkenized expression
-    Node* node = expr();
+    program();
 
     // Output the first half of the assembly
     printf(".intel_syntax noprefix\n");
@@ -24,7 +24,9 @@ int main(int argc, char* argv[]){
     printf("main:\n");
 
     // Output the assembly for calculations
-    genAssemblyFromNodesOfEBNF(node);
+    for(int i=0; code[i] != NULL; ++i){
+        genAssemblyFromNodesOfEBNF(code[i]);
+    }
 
     // Pop the calculation result from the stack, and return
     printf("    pop rax\n");

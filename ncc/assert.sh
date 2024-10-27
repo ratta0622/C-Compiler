@@ -23,7 +23,7 @@ for i in {0..100}; do
     d=$((RANDOM%10))
     e=$((RANDOM%10+1))
     ans=$((-(-a-b)*c-d/e))
-    assert "$ans" "-(-$a-$b) * + $c + (- $d /$e)"
+    assert "$ans" "-(-$a-$b) * + $c + (- $d /$e);"
 done
 
 echo OK
