@@ -71,4 +71,4 @@ char consume_ident();
 bool at_eof();
 Token* tokenize(char* p);
 void program();
-void genAssemblyFromNodesOfEBNF(Node* node);
+void genStatement(Node* node);

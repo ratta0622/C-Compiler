@@ -34,7 +34,7 @@ void error(char *format, ...){
 //If current token is expected operator(TK_OPE), advance to the next token and return true.
 //Otherwise, return false.
 bool consume_operator(char* op){
-    if(token->kind == TK_OPE && strncmp(token->str, op, token->len)==0){
+    if(token->kind == TK_OPE && strncmp(token->str, op, strlen(op))==0){
         token = token->next;
         return true;
     }else{
@@ -45,7 +45,7 @@ bool consume_operator(char* op){
 //If current token is expected operator(TK_OPE), advance to the next token.
 //Otherwise, report errors.
 void expect_operator(char* op){
-    if(token->kind == TK_OPE && strncmp(token->str, op, token->len)==0){
+    if(token->kind == TK_OPE && strncmp(token->str, op, strlen(op))==0){
         token = token->next;
     }else{
         error_at(token->str, "not %s", op);
@@ -66,8 +66,9 @@ int expect_number(){
 
 char consume_ident(){
     if(token->kind == TK_IDENT){
-        token = token->next;
-        return token->str[0];
+        Token *tok = token;
+        token = tok->next;
+    return tok->str[0];
     }else{
         return '!';
     }
@@ -110,7 +111,7 @@ Token* tokenize(char *p){
             cur = new_token(TK_OPE, cur, p, 2);
             ++p; ++p;
             continue;
-        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';'){
+        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '='){
             cur = new_token(TK_OPE, cur, p++, 1);
             continue;
         }

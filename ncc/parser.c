@@ -147,7 +147,7 @@ Node* unary(){
 Node* primary(){
     char tok = consume_ident();
     if(tok != '!'){
-
+        return new_node_ident(tok);
     }else if(consume_operator("(")){
         Node* node = expr();
         expect_operator(")");

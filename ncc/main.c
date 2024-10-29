@@ -16,6 +16,7 @@ int main(int argc, char* argv[]){
     token = tokenize(user_input);
 
     // Perse the torkenized expression
+    // The results are stored in Node* code[100]
     program();
 
     // Output the first half of the assembly
@@ -23,13 +24,25 @@ int main(int argc, char* argv[]){
     printf(".global main\n");
     printf("main:\n");
 
-    // Output the assembly for calculations
+    // Prologue
+    // Allocate space for 26 variables(a-z)
+    printf("    push rbp\n"); // Save the return address(value of RBP) on to the stack, before the function call
+    printf("    mov rbp, rsp\n");
+    printf("    sub rsp, 208\n");
+
+    // Output the assembly for code consisting of multiple statements
     for(int i=0; code[i] != NULL; ++i){
-        genAssemblyFromNodesOfEBNF(code[i]);
+        genStatement(code[i]);
+
+        // There must be one value remaining on the stack as the result of the expression evaluation,
+        // so pop it to prevent stack overflow.
+        printf("    pop rax\n");
     }
 
-    // Pop the calculation result from the stack, and return
-    printf("    pop rax\n");
+    // Epilogue
+    // The result of the final expression remains in RAX, which becomes the return value
+    printf("    mov rsp, rbp\n");
+    printf("    pop rbp\n"); // Pop the return address that is before the function call
     printf("    ret\n");
 
     return 0;
