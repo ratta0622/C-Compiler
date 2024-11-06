@@ -2,6 +2,8 @@
 
 char* user_input;
 Token* token;
+Lvar* headLocalList;
+Lvar* localList;
 
 int main(int argc, char* argv[]){
     if(argc != 2){
@@ -15,9 +17,20 @@ int main(int argc, char* argv[]){
     // Tokenize input
     token = tokenize(user_input);
 
+    headLocalList = calloc(1, sizeof(Lvar));
+    headLocalList->next = NULL;
+    headLocalList->offset = -8;
+    localList = headLocalList;
+
     // Perse the torkenized expression
     // The results are stored in Node* code[100]
     program();
+
+    // Assign offsets to local variables
+    int offset = 0;
+    for(Lvar* local = headLocalList->next; local != NULL; local = local->next){
+        offset += 8;
+    }
 
     // Output the first half of the assembly
     printf(".intel_syntax noprefix\n");
@@ -28,7 +41,8 @@ int main(int argc, char* argv[]){
     // Allocate space for 26 variables(a-z)
     printf("    push rbp\n"); // Save the return address(value of RBP) on to the stack, before the function call
     printf("    mov rbp, rsp\n");
-    printf("    sub rsp, 208\n");
+    // printf("    sub rsp, 208\n");
+    printf("    sub rsp, %d\n", offset);
 
     // Output the assembly for code consisting of multiple statements
     for(int i=0; code[i] != NULL; ++i){

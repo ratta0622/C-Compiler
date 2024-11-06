@@ -20,7 +20,7 @@ void genStatement(Node* node){
         printf("    push %d\n", node->val);
         return;
 
-    case ND_LVAR: // If node is name of local variable(a-z)
+    case ND_LVAR: // If node is name of local variable
         setAddressToRAX(node);
         printf("    mov rax, [rax]\n"); // Set the value of the variable to RAX
         printf("    push rax\n"); // This statement is the same as the case of ND_NUM

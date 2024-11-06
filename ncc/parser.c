@@ -1,26 +1,50 @@
 #include "ncc.h"
 
+// Search for a variable by name.
+// If not found, return NULL.
+Lvar* searchLvar(Token* tok){
+    for(Lvar* local = headLocalList; local != NULL; local = local->next){
+        if(local->len == tok->len && strncmp(local->name, tok->str, local->len)==0){
+            return local;
+        }
+    }
+    return NULL;
+}
 
-//Create a new node (kind is operator)
-Node* new_node_op(NodeKind kind, Node* lhs, Node* rhs){
+// Create a new node from a token(kind is operator)
+Node* newNodeOperation(NodeKind kind, Node* lhs, Node* rhs){
     Node* node = calloc(1, sizeof(Node));
     node->kind = kind;
     node->lhs = lhs;
     node->rhs = rhs;
     return node;
 }
-//Create a new node(kind is number)
-Node* new_node_num(int val){
+// Create a new node from a token(kind is number)
+Node* newNodeNumber(int val){
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
     return node;
 }
-//Create a new node(kind is identifier)
-Node* new_node_ident(char tok){
+// Create a new node from a token(kind is identifier)
+Node* newNodeIdent(Token* tok){
     Node* node = calloc(1, sizeof(Node));
     node->kind = ND_LVAR;
-    node->offset = (tok - 'a' +1)*8; // offset of a single local variable is 8. In addition, local variables are arranged in order as a, b, c, d, ... , z
+
+    Lvar *local = searchLvar(tok);
+    if(local != NULL){
+        node->offset = local->offset;
+    }else{
+        local = calloc(1, sizeof(Lvar));
+        localList->next = local;                    // add to the end of the list
+        local->len = tok->len;                      // local.len
+        local->name = (char*)malloc(sizeof(char) * (local->len + 1));
+        strncpy(local->name, tok->str, local->len); // local.name
+        local->name[local->len] = '\0';             // Same as above
+        local->offset = localList->offset + 8;      // local.offset
+        node->offset = local->offset;               // node.offset
+        localList = local;                          // Update the current element of the list
+    }
     return node;
 }
 
@@ -49,7 +73,7 @@ Node* primary();
 
 void program(){
     int i=0;
-    while(!at_eof()){
+    while(!atEof()){
         code[i++] = stmt();
     }
     code[i] = NULL; // end of code
@@ -57,7 +81,7 @@ void program(){
 
 Node* stmt(){
     Node* node = expr();
-    expect_operator(";"); // if there is not ';', error
+    expectOperator(";"); // if there is not ';', error
     return node;
 }
 
@@ -68,8 +92,8 @@ Node* expr(){
 
 Node* assign(){
     Node* node = equality();
-    if(consume_operator("=")){
-        node = new_node_op(ND_ASS, node, assign());
+    if(consumeOperator("=")){
+        node = newNodeOperation(ND_ASS, node, assign());
     }
     return node;
 }
@@ -78,10 +102,10 @@ Node* equality(){
     Node* node = relational();
 
     while(1){
-        if(consume_operator("==")){
-            node = new_node_op(ND_EQ, node, relational());
-        }else if(consume_operator("!=")){
-            node = new_node_op(ND_NEQ, node, relational());
+        if(consumeOperator("==")){
+            node = newNodeOperation(ND_EQ, node, relational());
+        }else if(consumeOperator("!=")){
+            node = newNodeOperation(ND_NEQ, node, relational());
         }else{
             return node;
         }
@@ -92,14 +116,14 @@ Node* relational(){
     Node* node = add();
 
     while(1){
-        if(consume_operator(">=")){
-            node = new_node_op(ND_GEQ, add(), node);
-        }else if(consume_operator(">")){
-            node = new_node_op(ND_GE, add(), node);
-        }else if(consume_operator("<=")){
-            node = new_node_op(ND_LEQ, node, add());
-        }else if(consume_operator("<")){
-            node = new_node_op(ND_LE, node, add());
+        if(consumeOperator(">=")){
+            node = newNodeOperation(ND_GEQ, add(), node);
+        }else if(consumeOperator(">")){
+            node = newNodeOperation(ND_GE, add(), node);
+        }else if(consumeOperator("<=")){
+            node = newNodeOperation(ND_LEQ, node, add());
+        }else if(consumeOperator("<")){
+            node = newNodeOperation(ND_LE, node, add());
         }else{
             return node;
         }
@@ -110,10 +134,10 @@ Node* add(){
     Node* node = mul();
 
     while(1){
-        if(consume_operator("+")){
-            node = new_node_op(ND_ADD, node, mul());
-        }else if(consume_operator("-")){
-            node = new_node_op(ND_SUB, node, mul());
+        if(consumeOperator("+")){
+            node = newNodeOperation(ND_ADD, node, mul());
+        }else if(consumeOperator("-")){
+            node = newNodeOperation(ND_SUB, node, mul());
         }else{
             return node;
         }
@@ -124,10 +148,10 @@ Node* mul(){
     Node* node = unary();
 
     while(1){
-        if(consume_operator("*")){
-            node = new_node_op(ND_MUL, node, unary());
-        }else if(consume_operator("/")){
-            node = new_node_op(ND_DIV, node, unary());
+        if(consumeOperator("*")){
+            node = newNodeOperation(ND_MUL, node, unary());
+        }else if(consumeOperator("/")){
+            node = newNodeOperation(ND_DIV, node, unary());
         }else{
             return node;
         }
@@ -135,24 +159,24 @@ Node* mul(){
 }
 
 Node* unary(){
-    if(consume_operator("+")){
+    if(consumeOperator("+")){
         return primary();
     }
-    if(consume_operator("-")){
-        return new_node_op(ND_SUB, new_node_num(0), primary());
+    if(consumeOperator("-")){
+        return newNodeOperation(ND_SUB, newNodeNumber(0), primary());
     }
     return primary();
 }
 
 Node* primary(){
-    char tok = consume_ident();
-    if(tok != '!'){
-        return new_node_ident(tok);
-    }else if(consume_operator("(")){
+    Token* tok = consumeIdent();
+    if(tok != NULL){
+        return newNodeIdent(tok);
+    }else if(consumeOperator("(")){
         Node* node = expr();
-        expect_operator(")");
+        expectOperator(")");
         return node;
     }else{
-        return new_node_num(expect_number());
+        return newNodeNumber(expectNumber());
     }
 }

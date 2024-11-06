@@ -14,7 +14,7 @@ typedef enum{
 } TokenKind;
 
 // token type
-// (list of token <=> input equation)
+// (list of token <=> input statements)
 typedef struct Token Token;
 
 struct Token{
@@ -25,6 +25,20 @@ struct Token{
     int len;        // Token length
 };
 
+// local variable type
+// (list representing local variables)
+typedef struct Lvar Lvar;
+
+struct Lvar{
+    Lvar *next; // next local variable
+    char *name; // name of local variable
+    int len;    // length of name
+    int offset; // offset from RBP
+};
+
+// list of local variables
+extern Lvar* headLocalList;
+extern Lvar* localList;
 
 //kinds of nodes in the abstract syntax tree
 typedef enum{
@@ -62,13 +76,13 @@ extern Node* code[100];
 
 
 //function declaration
-void error_at(char* location, char* format, ...);
+void errorAt(char* location, char* format, ...);
 void error(char* format, ...);
-bool consume_operator(char* op);
-void expect_operator(char* op);
-int expect_number();
-char consume_ident();
-bool at_eof();
+bool consumeOperator(char* op);
+void expectOperator(char* op);
+int expectNumber();
+Token* consumeIdent();
+bool atEof();
 Token* tokenize(char* p);
 void program();
 void genStatement(Node* node);
