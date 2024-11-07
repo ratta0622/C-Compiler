@@ -76,10 +76,32 @@ Token* consumeIdent(){
     }
 }
 
-// If current token is return(TK_RETURN), advance to the next token and return true.
+// If current token is "return"(TK_RETURN), advance to the next token and return true.
 // Otherwise, return false.
 bool consumeReturn(){
     if(token->kind == TK_RETURN){
+        token = token->next;
+        return true;
+    }else{
+        return false;
+    }
+}
+
+// If current token is "if"(TK_IF), advance to the next token and return true.
+// Otherwise, return false.
+bool consumeIf(){
+    if(token->kind == TK_IF){
+        token = token->next;
+        return true;
+    }else{
+        return false;
+    }
+}
+
+// If current token is "else"(TK_ELSE), advance to the next token and return true.
+// Otherwise, return false.
+bool consumeElse(){
+    if(token->kind == TK_ELSE){
         token = token->next;
         return true;
     }else{
@@ -142,10 +164,25 @@ Token* tokenize(char *p){
             cur->val = strtol(p, &p, 10);
             continue;
         }
-        //If p is return(ensure that it is not a variable name)
+
+        // If p is "return"(ensure that it is not a variable name)
         if(strncmp(p, "return", 6) == 0 && !isValName(p[6])){
             cur = newToken(TK_RETURN, cur, p, 6);
             p += 6;
+            continue;
+        }
+
+        // If p is "if"(ensure that it is not a variable name)
+        if(strncmp(p, "if", 2) == 0 && !isValName(p[2])){
+            cur = newToken(TK_IF, cur, p, 2);
+            p += 2;
+            continue;
+        }
+
+        // If p is "else"(ensure that it is not a variable name)
+        if(strncmp(p, "else", 4) == 0 && !isValName(p[4])){
+            cur = newToken(TK_ELSE, cur, p, 4);
+            p += 4;
             continue;
         }
 

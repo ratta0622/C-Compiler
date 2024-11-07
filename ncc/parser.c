@@ -50,7 +50,11 @@ Node* newNodeIdent(Token* tok){
 
 // EBNF(abstract syntax tree)
 //  program    = stmt*
-//  stmt       = expr ";" | "return" expr ";"
+//  stmt       = expr ";"
+//               | "return" expr ";"
+//               | "if" "(" expr ")" stmt ("else" stmt)?
+//               | "while" "(" expr ")" stmt
+//               | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 //  expr       = assign
 //  assign     = equality ("=" assign)?
 //  equality   = relational ("==" relational | "!=" relational)*
@@ -80,19 +84,37 @@ void program(){
     code[i] = NULL; // end of code
 }
 
-//  stmt       = expr ";" | "return" expr ";"
+//  stmt       = expr ";"
+//               | "return" expr ";"
+//               | "if" "(" expr ")" stmt ("else" stmt)?
+//               | "while" "(" expr ")" stmt
+//               | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 Node* stmt(){
     Node* node;
 
-    if(consumeReturn()){
+    if(consumeIf()){ // "if" "(" expr ")" stmt ("else" stmt)?
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+
+        expectOperator("(");
+        node->cond = expr();
+        expectOperator(")");
+
+        node->stmt = stmt();
+
+        if(consumeElse()){
+            node->stmtElse = stmt();
+        }
+    }else if(consumeReturn()){ // "return" expr ";"
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->rhs = expr();
-    }else{
+        expectOperator(";");
+    }else{ // expr ";"
         node = expr();
+        expectOperator(";");
     }
 
-    expectOperator(";"); // if there is not ';', error
     return node;
 }
 

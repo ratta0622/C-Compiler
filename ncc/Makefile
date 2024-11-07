@@ -13,8 +13,9 @@ assert: ncc
 		./ncc $$file > tmp.s; \
 		gcc -o tmp tmp.s -z execstack; \
 		cat $$file; \
+		echo "\n";\
 		./tmp; \
-		echo "\n\nreturn value: $$?\n\n";\
+		echo "\nreturn value: $$?\n\n";\
 	done
 
 tmp: tmp.s

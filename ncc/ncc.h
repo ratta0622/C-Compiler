@@ -11,7 +11,9 @@ typedef enum{
     TK_OPE,    // token of operator(+, -, *, /, ...)
     TK_IDENT,  // identifier
     TK_NUM,    // token of number
-    TK_RETURN, // token of return statement
+    TK_RETURN, // token of "return"
+    TK_IF,     // token of "if"
+    TK_ELSE,   // token of "else"
     TK_EOF,    // token of End Of File(\0)
 } TokenKind;
 
@@ -57,7 +59,8 @@ typedef enum{
     ND_ASS,    // =
     ND_LVAR,   // local variables
     ND_NUM,    // integer
-    ND_RETURN, // return
+    ND_IF,     // "if"
+    ND_RETURN, // "return"
 } NodeKind;
 
 // type of nodes in the abstract syntax tree
@@ -67,6 +70,9 @@ struct Node{
     NodeKind kind; // type of a node
     Node *lhs;     // left-hand side
     Node *rhs;     // right-hand side
+    Node *cond;    // condition expression (if kind = if, while, for)
+    Node *stmt;    // statements executed if condition==true (if kind = if, while, for)
+    Node *stmtElse;// statements executed if condition==false (if kind = if)
     int val;       // number of a node (if kind = ND_NUM)
     int offset;     // offset of local variable (if kind = ND_LVAR)
 };
@@ -86,6 +92,8 @@ void expectOperator(char* op);
 int expectNumber();
 Token* consumeIdent();
 bool consumeReturn();
+bool consumeIf();
+bool consumeElse();
 bool atEof();
 Token* tokenize(char* p);
 void program();

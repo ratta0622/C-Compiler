@@ -39,12 +39,28 @@ void genStatement(Node* node){
         return;
 
     case ND_RETURN: // If node is "return"
-        genStatement(node->rhs);
+        genStatement(node->rhs); // Push RHS
         printf("    pop rax\n"); // RAX is return value
         // Epilogue that is the same as one of main.c
         printf("    mov rsp, rbp\n");
         printf("    pop rbp\n");
         printf("    ret\n");
+        return;
+
+    case ND_IF: // If node is "if"
+        genStatement(node->cond); // Push condition
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
+        if(node->stmtElse){
+            printf("    je .LabelElse\n");
+        }
+        genStatement(node->stmt); // Condition==true
+        printf("    jmp .LabelEnd\n");
+        if(node->stmtElse){
+            printf(".LabelElse:\n");
+            genStatement(node->stmtElse); // Condition==false
+        }
+        printf(".LabelEnd:\n");
         return;
     }
 
