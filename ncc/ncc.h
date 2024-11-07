@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include <errno.h>
 
 //kinds of tokens
 typedef enum{
@@ -72,7 +73,7 @@ struct Node{
 
 
 //global variable
-extern char* user_input;
+extern char* userInput;
 extern Token* token;
 extern Node* code[100];
 

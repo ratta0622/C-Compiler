@@ -1,9 +1,41 @@
 #include "ncc.h"
 
-char* user_input;
+char* userInput;
 Token* token;
 Lvar* headLocalList;
 Lvar* localList;
+
+// Open the file specified by the path, and return the contents of the file as char*
+char *readFile(char *filepath){
+    // Open the file
+    FILE *fp = fopen(filepath, "r");
+    if(!fp){
+        error("cannnot open %s: %s", filepath, strerror(errno));
+    }
+
+    // Get the file size and assign it to "size"
+    if(fseek(fp, 0, SEEK_END) == -1){
+        error("%s: fseek: %s", filepath, strerror(errno));
+    }
+    size_t size = ftell(fp);
+
+    // Read the contents of the file, to return it(fileInput)
+    char *fileInput = calloc(1, size + 2);
+    if(fseek(fp, 0, SEEK_SET) == -1){
+        error("%s: fseek: %s", filepath, strerror(errno));
+    }
+    fread(fileInput, size, 1, fp);
+
+    // Ensure that the file ends with "\n\0"
+    if(size == 0 || fileInput[size - 1] != '\n'){
+        fileInput[size++] = '\n';
+    }
+    fileInput[size] = '\0';
+
+    fclose(fp);
+
+    return fileInput;
+}
 
 int main(int argc, char* argv[]){
     if(argc != 2){
@@ -11,11 +43,11 @@ int main(int argc, char* argv[]){
         return 1;
     }
 
-    // Save argv[1] to user_input(global val) for error messages.
-    user_input = argv[1];
+    // Save argv[1] to userInput(global val) for error messages.
+    userInput = readFile(argv[1]);
 
     // Tokenize input
-    token = tokenize(user_input);
+    token = tokenize(userInput);
 
     headLocalList = calloc(1, sizeof(Lvar));
     headLocalList->next = NULL;

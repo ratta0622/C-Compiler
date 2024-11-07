@@ -6,11 +6,11 @@ void errorAt(char* location, char* format, ...){
     va_list ap;
     va_start(ap, format);
 
-    int pos = location - user_input; // the byte position of the rror in the input
+    int pos = location - userInput; // the byte position of the error in the input
 
     fprintf(stderr, "\nInput error\n\n");
-    // 1st line ... user_input
-    fprintf(stderr, "%s\n", user_input);
+    // 1st line ... userInput
+    fprintf(stderr, "%s\n", userInput);
 
     // 2nd line
     fprintf(stderr, "%*s", pos, " "); // output pos number of spaces
