@@ -14,6 +14,7 @@ typedef enum{
     TK_RETURN, // token of "return"
     TK_IF,     // token of "if"
     TK_ELSE,   // token of "else"
+    TK_WHILE,  // token of "while"
     TK_EOF,    // token of End Of File(\0)
 } TokenKind;
 
@@ -60,6 +61,7 @@ typedef enum{
     ND_LVAR,   // local variables
     ND_NUM,    // integer
     ND_IF,     // "if"
+    ND_WHILE,  // "while"
     ND_RETURN, // "return"
 } NodeKind;
 
@@ -94,6 +96,7 @@ Token* consumeIdent();
 bool consumeReturn();
 bool consumeIf();
 bool consumeElse();
+bool consumeWhile();
 bool atEof();
 Token* tokenize(char* p);
 void program();

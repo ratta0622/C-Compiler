@@ -105,6 +105,17 @@ Node* stmt(){
         if(consumeElse()){
             node->stmtElse = stmt();
         }
+
+    }else if(consumeWhile()){ // "while" "(" expr ")" stmt
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+
+        expectOperator("(");
+        node->cond = expr();
+        expectOperator(")");
+
+        node->stmt = stmt();
+
     }else if(consumeReturn()){ // "return" expr ";"
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;

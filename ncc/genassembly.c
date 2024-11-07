@@ -62,6 +62,17 @@ void genStatement(Node* node){
         }
         printf(".LabelEnd:\n");
         return;
+
+    case ND_WHILE: // If node is "while"
+        printf(".LabelBegin:\n");
+        genStatement(node->cond); // Push condition
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
+        printf("    je .LabelEnd\n");
+        genStatement(node->stmt); // Condition == true
+        printf("    jmp .LabelBegin\n");
+        printf(".LabelEnd:");
+        return;
     }
 
     // recursive

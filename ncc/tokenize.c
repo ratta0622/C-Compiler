@@ -109,6 +109,17 @@ bool consumeElse(){
     }
 }
 
+// If current token is "while"(TK_WHILE), advance to the next token and return true.
+// Otherwise, return false.
+bool consumeWhile(){
+    if(token->kind == TK_WHILE){
+        token = token->next;
+        return true;
+    }else{
+        return false;
+    }
+}
+
 // Return a boolean value that whether token is EOF(\0)
 bool atEof(){
     return token->kind == TK_EOF;
@@ -183,6 +194,13 @@ Token* tokenize(char *p){
         if(strncmp(p, "else", 4) == 0 && !isValName(p[4])){
             cur = newToken(TK_ELSE, cur, p, 4);
             p += 4;
+            continue;
+        }
+
+        // If p is "while"(ensure that it is not a variable name)
+        if(strncmp(p, "while", 5) == 0 && !isValName(p[5])){
+            cur = newToken(TK_WHILE, cur, p, 5);
+            p += 5;
             continue;
         }
 
