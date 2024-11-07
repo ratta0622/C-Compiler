@@ -89,7 +89,13 @@ void genStatement(Node* node){
         genStatement(node->update);
         printf("    jmp .LabelBegin%ld\n", labelNumber);
         printf(".LabelEnd%ld:\n", labelNumber);
+        return;
 
+    case ND_BLOCK: // If node is block{}
+        while(node->next != NULL){
+            genStatement(node->next);
+            node = node->next;
+        }
         return;
     }
 

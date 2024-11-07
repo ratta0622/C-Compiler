@@ -85,6 +85,7 @@ void program(){
 }
 
 //  stmt       = expr ";"
+//               | "{" stmt* "}"
 //               | "return" expr ";"
 //               | "if" "(" expr ")" stmt ("else" stmt)?
 //               | "while" "(" expr ")" stmt
@@ -142,6 +143,16 @@ Node* stmt(){
         node->kind = ND_RETURN;
         node->rhs = expr();
         expectOperator(";");
+
+    }else if(consumeOperator("{")){
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        Node* cur = node;
+        while(!consumeOperator("}")){
+            cur->next = stmt();
+            cur = cur->next;
+        }
+        return node;
     }else{ // expr ";"
         node = expr();
         expectOperator(";");
