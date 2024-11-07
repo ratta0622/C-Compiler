@@ -50,7 +50,7 @@ Node* newNodeIdent(Token* tok){
 
 // EBNF(abstract syntax tree)
 //  program    = stmt*
-//  stmt       = expr ";"
+//  stmt       = expr ";" | "return" expr ";"
 //  expr       = assign
 //  assign     = equality ("=" assign)?
 //  equality   = relational ("==" relational | "!=" relational)*
@@ -71,6 +71,7 @@ Node* mul();
 Node* unary();
 Node* primary();
 
+//  program    = stmt*
 void program(){
     int i=0;
     while(!atEof()){
@@ -79,17 +80,29 @@ void program(){
     code[i] = NULL; // end of code
 }
 
+//  stmt       = expr ";" | "return" expr ";"
 Node* stmt(){
-    Node* node = expr();
+    Node* node;
+
+    if(consumeReturn()){
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->rhs = expr();
+    }else{
+        node = expr();
+    }
+
     expectOperator(";"); // if there is not ';', error
     return node;
 }
 
+//  expr       = assign
 Node* expr(){
     Node* node = assign();
     return node;
 }
 
+//  assign     = equality ("=" assign)?
 Node* assign(){
     Node* node = equality();
     if(consumeOperator("=")){
@@ -98,6 +111,7 @@ Node* assign(){
     return node;
 }
 
+//  equality   = relational ("==" relational | "!=" relational)*
 Node* equality(){
     Node* node = relational();
 
@@ -112,6 +126,7 @@ Node* equality(){
     }
 }
 
+//  relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node* relational(){
     Node* node = add();
 
@@ -130,6 +145,7 @@ Node* relational(){
     }
 }
 
+//  add        = mul ("+" mul | "-" mul)*
 Node* add(){
     Node* node = mul();
 
@@ -144,6 +160,7 @@ Node* add(){
     }
 }
 
+//  mul        = unary ('*' unary | '/' unary)*
 Node* mul(){
     Node* node = unary();
 
@@ -158,6 +175,7 @@ Node* mul(){
     }
 }
 
+//  unary      = ('+' | '-')? primary
 Node* unary(){
     if(consumeOperator("+")){
         return primary();
@@ -168,6 +186,7 @@ Node* unary(){
     return primary();
 }
 
+//  primary    = num | ident | ( '(' expr ')')
 Node* primary(){
     Token* tok = consumeIdent();
     if(tok != NULL){

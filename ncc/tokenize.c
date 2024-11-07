@@ -76,9 +76,25 @@ Token* consumeIdent(){
     }
 }
 
+// If current token is return(TK_RETURN), advance to the next token and return true.
+// Otherwise, return false.
+bool consumeReturn(){
+    if(token->kind == TK_RETURN){
+        token = token->next;
+        return true;
+    }else{
+        return false;
+    }
+}
+
 // Return a boolean value that whether token is EOF(\0)
 bool atEof(){
     return token->kind == TK_EOF;
+}
+
+// return true if the character can be used in a variable name
+bool isValName(char c){
+    return ('a' <= c && c <= 'z') || ('a' <= c && c <= 'z') || ('0' <= c && c <= '9') || (c == '_');
 }
 
 // create a new token, and link it to cur
@@ -111,24 +127,10 @@ Token* tokenize(char *p){
         // If p is an operator
         if(strncmp(p, "==", 2)==0 || strncmp(p, "!=", 2)==0 || strncmp(p, "<=", 2)==0 || strncmp(p, ">=", 2)==0){
             cur = newToken(TK_OPE, cur, p, 2);
-            ++p; ++p;
+            p += 2;
             continue;
         }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '='){
             cur = newToken(TK_OPE, cur, p++, 1);
-            continue;
-        }
-
-        // If p is an identifier(named a-z, A-Z, 0-9, _)
-        if(('a' <= *p && *p <= 'z') || ('A' <= *p && *p <= 'Z') || (*p == '_')){
-            char *temp = p;
-            int count = 0;
-            // Count length of the variable name
-            while (('a' <= *temp && *temp <= 'z') || ('A' <= *temp && *temp <= 'Z') || (*temp == '_')){
-                ++count;
-                ++temp;
-            }
-            cur = newToken(TK_IDENT, cur, p, count);
-            p += count;
             continue;
         }
 
@@ -140,6 +142,27 @@ Token* tokenize(char *p){
             cur->val = strtol(p, &p, 10);
             continue;
         }
+        //If p is return(ensure that it is not a variable name)
+        if(strncmp(p, "return", 6) == 0 && !isValName(p[6])){
+            cur = newToken(TK_RETURN, cur, p, 6);
+            p += 6;
+            continue;
+        }
+
+        // If p is an identifier(named a-z, A-Z, 0-9, _)
+        if(isValName(*p)){
+            char *temp = p;
+            int count = 0;
+            // Count length of the variable name
+            while (isValName(*temp)){
+                ++count;
+                ++temp;
+            }
+            cur = newToken(TK_IDENT, cur, p, count);
+            p += count;
+            continue;
+        }
+
 
         error("cannot tokenize");
     }

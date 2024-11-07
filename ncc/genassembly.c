@@ -37,6 +37,15 @@ void genStatement(Node* node){
         printf("    mov [rax], rdi\n"); // e.g.) a = 8
         printf("    push rdi\n"); // In C lang, the return value of an assignment expression is the value of the LHS after the assiginment
         return;
+
+    case ND_RETURN: // If node is "return"
+        genStatement(node->rhs);
+        printf("    pop rax\n"); // RAX is return value
+        // Epilogue that is the same as one of main.c
+        printf("    mov rsp, rbp\n");
+        printf("    pop rbp\n");
+        printf("    ret\n");
+        return;
     }
 
     // recursive

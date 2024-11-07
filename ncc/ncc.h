@@ -7,10 +7,11 @@
 
 //kinds of tokens
 typedef enum{
-    TK_OPE,   // token of operator(+, -, *, /, ...)
-    TK_IDENT, // identifier
-    TK_NUM,   // token of number
-    TK_EOF,   // token of End Of File(\0)
+    TK_OPE,    // token of operator(+, -, *, /, ...)
+    TK_IDENT,  // identifier
+    TK_NUM,    // token of number
+    TK_RETURN, // token of return statement
+    TK_EOF,    // token of End Of File(\0)
 } TokenKind;
 
 // token type
@@ -40,24 +41,25 @@ struct Lvar{
 extern Lvar* headLocalList;
 extern Lvar* localList;
 
-//kinds of nodes in the abstract syntax tree
+// kinds of nodes in the abstract syntax tree
 typedef enum{
-    ND_ADD,  // +
-    ND_SUB,  // -
-    ND_MUL,  // *
-    ND_DIV,  // /
-    ND_EQ,   // ==
-    ND_NEQ,  // !=
-    ND_GE,   // >
-    ND_GEQ,  // >=
-    ND_LE,   // <
-    ND_LEQ,  // <=
-    ND_ASS,  // =
-    ND_LVAR, // local variables
-    ND_NUM,  // integer
+    ND_ADD,    // +
+    ND_SUB,    // -
+    ND_MUL,    // *
+    ND_DIV,    // /
+    ND_EQ,     // ==
+    ND_NEQ,    // !=
+    ND_GE,     // >
+    ND_GEQ,    // >=
+    ND_LE,     // <
+    ND_LEQ,    // <=
+    ND_ASS,    // =
+    ND_LVAR,   // local variables
+    ND_NUM,    // integer
+    ND_RETURN, // return
 } NodeKind;
 
-//type of nodes in the abstract syntax tree
+// type of nodes in the abstract syntax tree
 typedef struct Node Node;
 
 struct Node{
@@ -82,6 +84,7 @@ bool consumeOperator(char* op);
 void expectOperator(char* op);
 int expectNumber();
 Token* consumeIdent();
+bool consumeReturn();
 bool atEof();
 Token* tokenize(char* p);
 void program();
