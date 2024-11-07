@@ -48,48 +48,54 @@ void genStatement(Node* node){
         return;
 
     case ND_IF: // If node is "if"
-        ++labelNumber;
+    {
+        long labelNum = labelNumber++;
         genStatement(node->cond); // Push condition
         printf("    pop rax\n");
         printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
         if(node->stmtElse){
-            printf("    je .LabelElse%ld\n", labelNumber);
+            printf("    je .LabelElse%ld\n", labelNum);
         }
         genStatement(node->stmt); // Condition==true
-        printf("    jmp .LabelEnd%ld\n", labelNumber);
+        printf("    jmp .LabelEnd%ld\n", labelNum);
         if(node->stmtElse){
-            printf(".LabelElse%ld:\n", labelNumber);
+            printf(".LabelElse%ld:\n", labelNum);
             genStatement(node->stmtElse); // Condition==false
         }
-        printf(".LabelEnd%ld:\n", labelNumber);
+        printf(".LabelEnd%ld:\n", labelNum);
         return;
+    }
 
     case ND_WHILE: // If node is "while"
-        ++labelNumber;
-        printf(".LabelBegin%ld:\n", labelNumber);
+    {
+        long labelNum = labelNumber++;
+        printf(".LabelBegin%ld:\n", labelNum);
         genStatement(node->cond); // Push condition
         printf("    pop rax\n");
         printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
-        printf("    je .LabelEnd%ld\n", labelNumber);
+        printf("    je .LabelEnd%ld\n", labelNum);
         genStatement(node->stmt); // Condition == true
-        printf("    jmp .LabelBegin%ld\n", labelNumber);
-        printf(".LabelEnd%ld:", labelNumber);
+        printf("    jmp .LabelBegin%ld\n", labelNum);
+        printf(".LabelEnd%ld:", labelNum);
         return;
+    }
 
     case ND_FOR: // If node is "for"
-        ++labelNumber;
+    {
+        long labelNum = labelNumber++;
         genStatement(node->initial);
-        printf(".LabelBegin%ld:\n", labelNumber);
+        printf(".LabelBegin%ld:\n", labelNum);
 
         genStatement(node->cond);
         printf("    pop rax\n");
         printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
-        printf("    je .LabelEnd%ld\n", labelNumber);
+        printf("    je .LabelEnd%ld\n", labelNum);
         genStatement(node->stmt); // Condition == true
         genStatement(node->update);
-        printf("    jmp .LabelBegin%ld\n", labelNumber);
-        printf(".LabelEnd%ld:\n", labelNumber);
+        printf("    jmp .LabelBegin%ld\n", labelNum);
+        printf(".LabelEnd%ld:\n", labelNum);
         return;
+    }
 
     case ND_BLOCK: // If node is block{}
         while(node->next != NULL){
@@ -110,44 +116,57 @@ void genStatement(Node* node){
     {
     case ND_ADD:
         printf("    add rax, rdi\n");
+        printf("    push rax\n");
         break;
 
     case ND_SUB:
         printf("    sub rax, rdi\n");
+        printf("    push rax\n");
         break;
 
     case ND_MUL:
         printf("    imul rax, rdi\n");
+        printf("    push rax\n");
         break;
 
     case ND_DIV:
         printf("    cqo\n");
         printf("    idiv rdi\n");
+        printf("    push rax\n");
         break;
+
+    case ND_MOD:
+        printf("    cqo\n");
+        printf("    idiv rdi\n");
+        printf("    push rdi\n");
 
     case ND_EQ:
         printf("    cmp rax, rdi\n");
         printf("    sete al\n");
         printf("    movzb rax, al\n");
+        printf("    push rax\n");
         break;
 
     case ND_NEQ:
         printf("    cmp rax, rdi\n");
         printf("    setne al\n");
         printf("    movzb rax, al\n");
+        printf("    push rax\n");
         break;
 
     case ND_LE:
         printf("    cmp rax, rdi\n");
         printf("    setl al\n");
         printf("    movzb rax, al\n");
+        printf("    push rax\n");
         break;
 
     case ND_LEQ:
         printf("    cmp rax, rdi\n");
         printf("    setle al\n");
         printf("    movzb rax, al\n");
+        printf("    push rax\n");
         break;
     }
-    printf("    push rax\n");
+
 }

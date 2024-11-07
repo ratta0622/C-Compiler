@@ -172,7 +172,7 @@ Token* tokenize(char *p){
             cur = newToken(TK_OPE, cur, p, 2);
             p += 2;
             continue;
-        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}'){
+        }else if(*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '%' || *p == '(' || *p == ')' || *p == '<' || *p == '>' || *p == ';' || *p == '=' || *p == '{' || *p == '}'){
             cur = newToken(TK_OPE, cur, p++, 1);
             continue;
         }

@@ -234,6 +234,8 @@ Node* mul(){
             node = newNodeOperation(ND_MUL, node, unary());
         }else if(consumeOperator("/")){
             node = newNodeOperation(ND_DIV, node, unary());
+        }else if(consumeOperator("%%")){
+            node = newNodeOperation(ND_MOD, node, unary());
         }else{
             return node;
         }
