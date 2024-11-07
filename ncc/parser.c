@@ -116,6 +116,27 @@ Node* stmt(){
 
         node->stmt = stmt();
 
+    }else if(consumeFor()){
+        node = calloc(1, sizeof(Node)); // "for" "(" expr? ";" expr? ";" expr? ")" stmt
+        node->kind = ND_FOR;
+
+        expectOperator("(");
+        if(!consumeOperator(";")){
+            node->initial = expr();
+            consumeOperator(";");
+        }
+        if(!consumeOperator(";")){
+            node->cond = expr();
+            consumeOperator(";");
+        }
+        if(!consumeOperator(";")){
+            node->update= expr();
+            consumeOperator(";");
+        }
+        expectOperator(")");
+
+        node->stmt = stmt();
+
     }else if(consumeReturn()){ // "return" expr ";"
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;

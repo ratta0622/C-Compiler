@@ -48,30 +48,48 @@ void genStatement(Node* node){
         return;
 
     case ND_IF: // If node is "if"
+        ++labelNumber;
         genStatement(node->cond); // Push condition
         printf("    pop rax\n");
         printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
         if(node->stmtElse){
-            printf("    je .LabelElse\n");
+            printf("    je .LabelElse%ld\n", labelNumber);
         }
         genStatement(node->stmt); // Condition==true
-        printf("    jmp .LabelEnd\n");
+        printf("    jmp .LabelEnd%ld\n", labelNumber);
         if(node->stmtElse){
-            printf(".LabelElse:\n");
+            printf(".LabelElse%ld:\n", labelNumber);
             genStatement(node->stmtElse); // Condition==false
         }
-        printf(".LabelEnd:\n");
+        printf(".LabelEnd%ld:\n", labelNumber);
         return;
 
     case ND_WHILE: // If node is "while"
-        printf(".LabelBegin:\n");
+        ++labelNumber;
+        printf(".LabelBegin%ld:\n", labelNumber);
         genStatement(node->cond); // Push condition
         printf("    pop rax\n");
         printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
-        printf("    je .LabelEnd\n");
+        printf("    je .LabelEnd%ld\n", labelNumber);
         genStatement(node->stmt); // Condition == true
-        printf("    jmp .LabelBegin\n");
-        printf(".LabelEnd:");
+        printf("    jmp .LabelBegin%ld\n", labelNumber);
+        printf(".LabelEnd%ld:", labelNumber);
+        return;
+
+    case ND_FOR: // If node is "for"
+        ++labelNumber;
+        genStatement(node->initial);
+        printf(".LabelBegin%ld:\n", labelNumber);
+
+        genStatement(node->cond);
+        printf("    pop rax\n");
+        printf("    cmp rax, 0\n"); // set RAX(value of condition expression) to Flag Register
+        printf("    je .LabelEnd%ld\n", labelNumber);
+        genStatement(node->stmt); // Condition == true
+        genStatement(node->update);
+        printf("    jmp .LabelBegin%ld\n", labelNumber);
+        printf(".LabelEnd%ld:\n", labelNumber);
+
         return;
     }
 

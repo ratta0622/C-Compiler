@@ -15,6 +15,7 @@ typedef enum{
     TK_IF,     // token of "if"
     TK_ELSE,   // token of "else"
     TK_WHILE,  // token of "while"
+    TK_FOR,    // token of "for"
     TK_EOF,    // token of End Of File(\0)
 } TokenKind;
 
@@ -62,6 +63,7 @@ typedef enum{
     ND_NUM,    // integer
     ND_IF,     // "if"
     ND_WHILE,  // "while"
+    ND_FOR,    // "for"
     ND_RETURN, // "return"
 } NodeKind;
 
@@ -69,13 +71,15 @@ typedef enum{
 typedef struct Node Node;
 
 struct Node{
-    NodeKind kind; // type of a node
-    Node *lhs;     // left-hand side
-    Node *rhs;     // right-hand side
-    Node *cond;    // condition expression (if kind = if, while, for)
-    Node *stmt;    // statements executed if condition==true (if kind = if, while, for)
-    Node *stmtElse;// statements executed if condition==false (if kind = if)
-    int val;       // number of a node (if kind = ND_NUM)
+    NodeKind kind;  // type of a node
+    Node *lhs;      // left-hand side
+    Node *rhs;      // right-hand side
+    Node *cond;     // condition expression (if kind = if, while, for)
+    Node *stmt;     // statements executed if condition==true (if kind = if, while, for)
+    Node *stmtElse; // statements executed if condition==false (if kind = if)
+    Node *initial;  // initialization (if kind = for)
+    Node *update;   // update such as increment (if kind = for)
+    int val;        // number of a node (if kind = ND_NUM)
     int offset;     // offset of local variable (if kind = ND_LVAR)
 };
 
@@ -84,6 +88,7 @@ struct Node{
 extern char* userInput;
 extern Token* token;
 extern Node* code[100];
+extern long labelNumber;
 
 
 //function declaration
@@ -97,6 +102,7 @@ bool consumeReturn();
 bool consumeIf();
 bool consumeElse();
 bool consumeWhile();
+bool consumeFor();
 bool atEof();
 Token* tokenize(char* p);
 void program();

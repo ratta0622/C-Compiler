@@ -4,6 +4,7 @@ char* userInput;
 Token* token;
 Lvar* headLocalList;
 Lvar* localList;
+long labelNumber;
 
 // Open the file specified by the path, and return the contents of the file as char*
 char *readFile(char *filepath){
@@ -53,6 +54,9 @@ int main(int argc, char* argv[]){
     headLocalList->next = NULL;
     headLocalList->offset = -8;
     localList = headLocalList;
+
+    // Initialize label number
+    labelNumber = 0;
 
     // Perse the torkenized expression
     // The results are stored in Node* code[100]
